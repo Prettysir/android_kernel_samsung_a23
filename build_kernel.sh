@@ -12,12 +12,13 @@ fi
 
 export ARCH=arm64
 export CLANG_TRIPLE=aarch64-linux-gnu-
+export DTC_EXT="$(pwd)/tools/dtc"
 export KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
 export PROJECT_NAME=a23
 
 setconfig() { # fmt: setconfig enable/disable <CONFIG_NAME>
 	if [ -d $(pwd)/scripts ]; then
-		./scripts/config --file $KERNEL_OUT/.config --`echo $1` CONFIG_`echo $2`
+		chmod +x ./scripts/config && ./scripts/config --file $KERNEL_OUT/.config --`echo $1` CONFIG_`echo $2`
 	else
 		pr_err "Folder scripts not found!"
 	fi
@@ -38,7 +39,7 @@ if [ "$KSU" = "true" ]; then
 	setconfig enable KSU
 fi
 
-build kernel `echo $JOBS` false false `echo $KERNEL_MAKE_ENV`
+build kernel `echo $JOBS` dummy_defconfig false false `echo $KERNEL_MAKE_ENV`
 
 if [ -e $IMAGE ] && [ -d $(pwd)/AnyKernel3 ]; then
 	if [ ! -z $DEVICE ]; then
