@@ -41,7 +41,7 @@ jobs:
           wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
           tar -xf clang18.tar.gz && rm clang18.tar.gz && cd ..
         fi
-        git clone https://github.com/theradcolor/aarch64-linux-gnu --depth=1 gnu
+        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
       working-directory: android_kernel_samsung_a23
 
     - name: Prepare timezone fix
@@ -53,8 +53,8 @@ jobs:
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
-        export CLANG_TRIPLE=$CROSS_COMPILE
+        export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-googlr-
+        export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export KERNELSU="${{ github.event.inputs.KSU }}"
 
