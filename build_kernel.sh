@@ -15,8 +15,20 @@ export CLANG_TRIPLE=aarch64-linux-gnu-
 export KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
 export PROJECT_NAME=a23
 
+IMAGE="$(pwd)/out/arch/arm64/boot/Image"
+
 # main build script, don't remove it
 source ./scripts/rsubuild.sh
 
 build defconfig $(nproc --all) `echo $DEFCONFIG` false false `echo $KERNEL_MAKE_ENV`
 build kernel $(nproc --all) `echo $DEFCONFIG` `echo $KERNEL_MAKE_ENV`
+
+if [ -e $IMAGE ] && [ -d $(pwd)/AnyKernel3 ]; then
+	if [ ! -z $DEVICE ]; then
+		DEVICE_MODEL="`echo $DEVICE`-"
+	fi
+	cp $IMAGE AnyKernel3/ && cd AnyKernel3 && zip -r6 ../`echo $DEVICE_MODEL`AnyKernel3_`echo $DATE`.zip *
+	if [[ $IS_CI != "true" ]]; then
+		rm Image && cd ..
+	fi
+fi
