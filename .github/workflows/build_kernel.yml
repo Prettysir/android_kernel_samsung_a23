@@ -41,7 +41,7 @@ jobs:
           wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
           tar -xf clang18.tar.gz && rm clang18.tar.gz && cd ..
         fi
-        $ git clone https://github.com/theradcolor/aarch64-linux-gnu --depth=1 gnu
+        git clone https://github.com/theradcolor/aarch64-linux-gnu --depth=1 gnu
       working-directory: android_kernel_samsung_a23
 
     - name: Prepare timezone fix
