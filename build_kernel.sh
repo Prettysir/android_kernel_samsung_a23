@@ -18,7 +18,7 @@ export PROJECT_NAME=a23
 
 setconfig() { # fmt: setconfig enable/disable <CONFIG_NAME>
 	if [ -d $(pwd)/scripts ]; then
-		chmod +x ./scripts/config && ./scripts/config --file $KERNEL_OUT/.config --`echo $1` CONFIG_`echo $2`
+		chmod +x ./scripts/config && ./scripts/config --file $(pwd)/out/.config --`echo $1` CONFIG_`echo $2`
 	else
 		pr_err "Folder scripts not found!"
 	fi
