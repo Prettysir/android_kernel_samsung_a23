@@ -53,7 +53,7 @@ jobs:
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-google-
+        export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export KERNELSU="${{ github.event.inputs.KSU }}"
