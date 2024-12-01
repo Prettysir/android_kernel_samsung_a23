@@ -15,13 +15,30 @@ export CLANG_TRIPLE=aarch64-linux-gnu-
 export KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
 export PROJECT_NAME=a23
 
+setconfig() { # fmt: setconfig enable/disable <CONFIG_NAME>
+	if [ -d $(pwd)/scripts ]; then
+		./scripts/config --file $KERNEL_OUT/.config --`echo $1` CONFIG_`echo $2`
+	else
+		pr_err "Folder scripts not found!"
+	fi
+}
+
+if [ "$KSU" = "true" ]; then
+	curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+fi
+
 IMAGE="$(pwd)/out/arch/arm64/boot/Image"
 
 # main build script, don't remove it
 source ./scripts/rsubuild.sh
 
-build defconfig $(nproc --all) `echo $DEFCONFIG` false false `echo $KERNEL_MAKE_ENV`
-build kernel $(nproc --all) `echo $DEFCONFIG` `echo $KERNEL_MAKE_ENV`
+build defconfig `echo $JOBS` `echo $DEFCONFIG` false false `echo $KERNEL_MAKE_ENV`
+
+if [ "$KSU" = "true" ]; then
+	setconfig enable KSU
+fi
+
+build kernel `echo $JOBS` false false `echo $KERNEL_MAKE_ENV`
 
 if [ -e $IMAGE ] && [ -d $(pwd)/AnyKernel3 ]; then
 	if [ ! -z $DEVICE ]; then
