@@ -102,7 +102,7 @@ jobs:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           android_kernel_samsung_a23/out/arch/arm64/boot/*.gz
-          android_kernel_samsung_a23/out/arch/arm64/boot/dts/*
+          android_kernel_samsung_a23/out/arch/arm64/boot/dts/qcom*
 
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
