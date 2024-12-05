@@ -24,23 +24,24 @@ jobs:
         path: android_kernel_samsung_a23
         show-progress: false
         fetch-depth: 1
-        
-    - name: Prepare dependencies
+              - name: Prepare dependencies
       run: |
-        sudo apt update -y
-        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl curl lz4 -y
+        sudo apt update -y && sudo apt upgrade -y
+        sudo apt install bc cpio flex bison aptitude git gcc g++ python-is-python3 tar perl curl libc++-dev lz4 -y
         sudo aptitude install libssl-dev -y
         
     - name: Fetch toolchains
       run: |
         mkdir toolchains
         cd toolchains
-        if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
+        if [[ ${{ github.event.inputs.CLANG_EIGHTEEN }} != "true" ]]; then
           git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
-          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
         else
-          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git
+          mkdir clang-18 && cd clang-18
+          wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
+          tar -xf clang18.tar.gz && rm clang18.tar.gz && cd ..
         fi
+        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
       working-directory: android_kernel_samsung_a23
 
     - name: Prepare timezone fix
@@ -51,19 +52,16 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
-          export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-          export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
-        else
-          export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
-          export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
-        fi
+        export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
+        export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export LLVM_STATE="${{ github.event.inputs.LLVM }}"
+        export KERNELSU="${{ github.event.inputs.KSU }}"
 
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
+        export DEVICE=A235X
+        export IS_CI=true
 
         # do some checks
         echo ""
@@ -76,21 +74,20 @@ jobs:
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
-        echo UPLOAD_2_TG="${{ github.event.inputs.UPLOAD_TG }}"
+        echo KERNELSU="$KERNELSU"
         echo ====================================================
         echo ""
         
-        export DEVICE=A235X
-        
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
-        bash $(pwd)/build_kernel.sh
+        bash $(pwd)/build_kernel.sh `echo $DEFCONFIG` `echo $KERNELSU` $(nproc --all)
+
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
+        export gitsha1=$(git rev-parse --short HEAD)
+        echo "sha=$gitsha1" >> $GITHUB_OUTPUT
+        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
         mv out/.config out/build_config.txt
-        gitsha1=$(git rev-parse --short HEAD)
-        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
       working-directory: android_kernel_samsung_a23
       
     - name: Upload config
@@ -105,11 +102,11 @@ jobs:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           android_kernel_samsung_a23/out/arch/arm64/boot/*.gz
-          android_kernel_samsung_a23/out/arch/arm64/boot/dts/samsung/*.dtbo
-          android_kernel_samsung_a23/out/arch/arm64/boot/dts//*.dtb
+          android_kernel_samsung_a23/out/arch/arm64/boot/dts/qcom*
 
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
-        path: android_kernel_samsung_a23/AnyKernel3/*
+        path: |
+          android_kernel_samsung_a23/AnyKernel3/*
