@@ -4,13 +4,13 @@ on:
     inputs:
       DEFCONFIG:
         description: Defconfig
-        default: 'rsuntk_defconfig'
+        default: 'vendor/rsuntk_defconfig'
         required: true
-      LLVM:
-        description: LLVM compiling
+      KSU:
+        description: Enable KernelSU support
         type: boolean
-      GOOGLE:
-        description: Use Google toolchains instead of proton-clang
+      CLANG_EIGHTEEN:
+        description: Use clang 18 (optional)
         type: boolean
         
 jobs:
