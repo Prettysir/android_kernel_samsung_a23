@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: Prettysir/android_kernel_samsung_a23
-        ref: android-4.19-stable
+        ref: 4.19
         path: android_kernel_samsung_a23
         show-progress: false
         fetch-depth: 1
