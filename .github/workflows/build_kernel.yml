@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: Prettysir/android_kernel_samsung_a23
+        repository: rsuntkOrgs/android_kernel_samsung_a23
         ref: 4.19
         path: android_kernel_samsung_a23
         show-progress: false
