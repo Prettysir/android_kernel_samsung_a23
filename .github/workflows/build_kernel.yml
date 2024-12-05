@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: rsuntkOrgs/android_kernel_samsung_a23
-        ref: 4.19
+        ref: android-4.19-stable
         path: android_kernel_samsung_a23
         show-progress: false
         fetch-depth: 1
